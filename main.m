@@ -2,6 +2,7 @@ clear;clc;
 
 %% Load DataSet
 addpath ../MINIST
+addpath ../minFunc/
 
 num = 1000;
 [images,labels,test_images,test_labels,imageDim] = LoadData('1D',num);
@@ -14,11 +15,14 @@ theta = rand(imageDim,classes);
 % Here we use two different methods to learn the weight
 %%
 % 1. Use the minfunc to fit
-
+addpath ../minFunc;
 labels_mat = full(sparse(labels,1:num,ones(1,num)));
 options.Display = 'iter';
 options.MaxIterations = 10;
-theta = fminunc(@(W)softmax(W,images,labels_mat,lambda),theta,options);
+theta_1 = theta(:);
+% theta = fminunc(@(W)softmax(W,images,imageDim,labels_mat,lambda),theta,options);
+theta = minFunc(@(W)softmax(W,images,imageDim,labels_mat,lambda),theta_1,options);
+theta = reshape(theta,imageDim,[]);
 %%
 % 2. The stochastic gradient decent
 
@@ -57,7 +61,7 @@ disp(accu)
 prob = exp(theta'*test_images);
 prob = bsxfun(@rdivide,prob,sum(prob));
 [~,prob_label] = max(prob);
-disp('The accuracy from the train set:')
+disp('The accuracy from the test set:')
 accu = 1-sum(prob_label==test_labels')/num;
 disp(accu)
 
