@@ -1,31 +1,31 @@
 clear;clc;
 
 %% Load DataSet
-addpath ../MINIST
-addpath ../minFunc/
+addpath ../MINIST;
+addpath(genpath('../minFunc'));
+addpath ../functions;
 
-num = 1000;
-[images,labels,test_images,test_labels,imageDim] = LoadData('1D',num);
+load.num = 1000;        % Annotate this line to load all the samples;
+load.type = '1D';       % choose the sample type '1D','2D'
+
+[images,labels,test_images,test_labels,imageDim] = LoadData(load);
+
 classes = length(unique(labels));
-
-lambda = 1e-6;
-
-theta = rand(imageDim,classes);
-
 % Here we use two different methods to learn the weight
 %%
 % 1. Use the minfunc to fit
-addpath ../minFunc;
 labels_mat = full(sparse(labels,1:num,ones(1,num)));
 options.Display = 'iter';
 options.MaxIterations = 10;
-theta_1 = theta(:);
+theta_1 = theta_ini(:);
 % theta = fminunc(@(W)softmax(W,images,imageDim,labels_mat,lambda),theta,options);
-theta = minFunc(@(W)softmax(W,images,imageDim,labels_mat,lambda),theta_1,options);
+theta = minFunc(@(W)softmax_cost(W,images,imageDim,labels_mat,lambda),theta_1);
 theta = reshape(theta,imageDim,[]);
+disp('The minfunc fitting:')
+test
 %%
 % 2. The stochastic gradient decent
-
+theta = theta_ini;
 delta = inf;
 learn_rate = 1e-3;
 n = 1;
@@ -49,19 +49,6 @@ theta_new = theta;
     theta = theta_new;
     n = n+1;
  end
- 
-%% Show the accuracy
-prob = exp(theta'*images);
-prob = bsxfun(@rdivide,prob,sum(prob));
-[~,prob_label] = max(prob);
-disp('The accuracy from the train set:')
-accu = 1-sum(prob_label==labels')/num;
-disp(accu)
-
-prob = exp(theta'*test_images);
-prob = bsxfun(@rdivide,prob,sum(prob));
-[~,prob_label] = max(prob);
-disp('The accuracy from the test set:')
-accu = 1-sum(prob_label==test_labels')/num;
-disp(accu)
-
+ %
+ disp('The SGD fitting:')
+ test
