@@ -9,7 +9,7 @@ load.num = 1000;        % Annotate this line to load all the samples;
 load.type = '1D';       % choose the sample type '1D','2D'
 
 [images,labels,test_images,test_labels,imageDim] = LoadData(load);
-
+num = size(labels,1);
 classes = length(unique(labels));
 % Here we use two different methods to learn the weight
 %%
@@ -17,6 +17,8 @@ classes = length(unique(labels));
 labels_mat = full(sparse(labels,1:num,ones(1,num)));
 options.Display = 'iter';
 options.MaxIterations = 10;
+lambda = 1e-4;
+theta_ini = randn(imageDim,classes);
 theta_1 = theta_ini(:);
 % theta = fminunc(@(W)softmax(W,images,imageDim,labels_mat,lambda),theta,options);
 theta = minFunc(@(W)softmax_cost(W,images,imageDim,labels_mat,lambda),theta_1);
